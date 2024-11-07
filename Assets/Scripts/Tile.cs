@@ -13,8 +13,7 @@ public class Tile : MonoBehaviour
     [SerializeField] int layer;
     [SerializeField] public bool isBlocked;
     [SerializeField] public RectTransform rectTransform;
-
-   [SerializeField] public int canvasOrder;
+    [SerializeField] public Vector2 saveRectTransform;
    [SerializeField] public bool isQueued;
    [SerializeField] public Button button;
 
@@ -78,15 +77,5 @@ public class Tile : MonoBehaviour
        void ButtonClick()
     {
         OnClick?.Invoke(id,location,layer);
-    }
-
-    internal float GetWidth()
-    {
-       return rectTransform.rect.width;
-    }
-
-    internal float GetHeight()
-    {
-       return rectTransform.rect.height;
     }
 }

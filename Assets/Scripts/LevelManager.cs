@@ -4,6 +4,7 @@ using UnityEngine;
 using DG;
 using DG.Tweening;
 using System.Linq;
+using UnityEngine.UI;
 
 public class LevelManager : MonoBehaviour
 {
@@ -12,22 +13,30 @@ public class LevelManager : MonoBehaviour
     public List<Tile> queueTiles;
     public List<int> tilesId;
     public LevelData levelData;
-    public int currentLevel=0;
     public Transform spawnPos;
     public Grid gridObj;
     public GameObject QueueTile;
-   
-    int currentTileIndex = 0;
-     public TileManager tileManager;
+    public TileManager tileManager;
+    public UIManager uIManager;
+
+    [Header("Ingame data")]
+    public int currentLevel=0;
+    [SerializeField]private int tileQueueContains = 6;
     void Start()
     {
-    levelData = Resources.Load<LevelData>($"Levels/Level{currentLevel}");
+    uIManager.addOneMoreSlot.onClick.AddListener(AddOneMoreSlot);
+    uIManager.reverseMove.onClick.AddListener(ReverseLastMove);
+    uIManager.shuffleTiles.onClick.AddListener(ShuffleTiles);
+    uIManager.NextLevel.onClick.AddListener(NextLevel);
     InitData();
     }
     void InitData()
-    {
-       tilesId = levelData.GetTileIds();
-    
+    { 
+       levelData = Resources.Load<LevelData>($"Levels/Level{currentLevel}");
+       tileQueueContains = 6;
+       tiles.Clear();
+       tilesId.Clear();
+       tilesId = tileManager.GetTilesIds(levelData);
        for(int i =0;i<levelData.shapeSOs.Count;i++){
         Grid grid = Instantiate(gridObj,spawnPos);
         grid.shapeSO = levelData.shapeSOs[i];
@@ -35,54 +44,55 @@ public class LevelManager : MonoBehaviour
         grid.InitLayer(i);
         grid.gameObject.name = $"Grid{i+1}";
         grid.InitGrid();
+        grid.InitData(tilesId);
         grid.AddToList(tiles);
-       //AssignTileId(grid);
         grids.Add(grid);
       }
+      AssignTileId();
       DisableOverLappedTiles(grids);
     }
+ 
 
-    //Truyen du lieu spirte cho tile
-    void AssignTileSprite(Grid grid, List<int> gridTileIds){
-      for(int i =0;i<grid.tiles.Count;i++)
+   //Truyen du lieu sprite cho tile
+    void AssignTileId()
+    {
+     List<int> tilesId = tileManager.GetTilesIds(levelData);
+     for(int i =0;i<tiles.Count;i++)
+     {
+      int tileId = tiles[i].GetId();
+      Sprite tileSprite = tileManager.GetSpriteById(tileId);
+      if(!tiles[i].isBlocked)
       {
-        int tileId = gridTileIds[i];
-        Sprite tileSprite = tileManager.GetSpriteById(tileId);
-        if(!grid.tiles[i].isBlocked){
-             grid.tiles[i].SetTileSprite(tileSprite);
-        }
+        tiles[i].SetTileSprite(tileSprite);
       }
-    }
-
-   //Truyen du lieu Id cho tile
-    void AssignTileId(Grid grid)
-    {
-       int totalTilesGrid = grid.tiles.Count;
-        if (tilesId.Count < totalTilesGrid)
-    {
-        Debug.LogError("Not enough tile IDs to assign to the grid.");
-        return;
-    }
-       List<int> gridTileIds = tilesId.GetRange(currentTileIndex,totalTilesGrid);
-       grid.InitData(gridTileIds);
-       currentTileIndex+=totalTilesGrid;
-       AssignTileSprite(grid,gridTileIds);
+     }
     }
     public void HanldSelectedTiled(int id, Vector2Int location, int layer){
+          if(queueTiles.Count >tileQueueContains)
+          {
+            return;
+          }
           foreach(Grid grid in grids){
             if(grid.layer == layer){
               grid.gridLayoutGroup.enabled = false;
               foreach(Tile tile in grid.tiles){
                 if(tile.location == location){
+                  tile.saveRectTransform = tile.rectTransform.anchoredPosition;
                  tile.transform.DOMove(QueueTile.transform.position,0.5f).OnComplete(()
                  =>{
                     tile.transform.SetParent(QueueTile.transform,true);
                     tile.SetRayCast(false);
                     tile.isQueued = true;
+                    tiles.Remove(tile);
                     queueTiles.Add(tile);
+                    tilesId.Remove(tile.GetId());
                     EnableRayCastOverLappedTiles(tile.GetLocation(),tile.GetLayer(),grids);
                     DisableOverLappedTiles(grids);
                     HandleThreeMatching(tile);
+                    if(tiles.Count ==0)
+                    {
+                      uIManager.SetActiveUIWin(true);
+                    }
                  });
                 }
               }
@@ -95,10 +105,11 @@ public class LevelManager : MonoBehaviour
         if(countSameId >=3){
            var tilesToRemove = queueTiles.Where(t=>t.GetId() == tile.GetId()).ToList();
            foreach(Tile t in tilesToRemove){
-              t.gameObject.SetActive(false);
+              Destroy(t.gameObject);
+              queueTiles.Remove(t);
+              tiles.Remove(t);
            }
            queueTiles = queueTiles.Where(t=>t.GetId() != tile.GetId()).ToList(); 
-           
         }  
       }
       public void DisableOverLappedTiles(List<Grid> gridList)
@@ -251,6 +262,89 @@ public class LevelManager : MonoBehaviour
           }
  }
       #endregion
+    public void AddOneMoreSlot()
+    {
+      tileQueueContains = 7;
+      uIManager.SetAddSlotButton(false);
+    }
+    #region Reverse
+    public void ReverseLastMove()
+    {
+      if(queueTiles.Count==0)
+      {
+        return;
+      }
+      Tile reversedTile = queueTiles[queueTiles.Count-1];
+      HorizontalLayoutGroup horizontalLayoutGroup =QueueTile.GetComponent<HorizontalLayoutGroup>();
+      horizontalLayoutGroup.enabled = false;
+      reversedTile.transform.SetParent(grids[reversedTile.GetLayer()].transform,true);
+      reversedTile.rectTransform.DOAnchorPos(reversedTile.saveRectTransform,0.5f).OnComplete(()
+        =>{
+            tiles.Add(reversedTile);
+            queueTiles.Remove(reversedTile);
+            tilesId.Add(reversedTile.GetId());
+            reversedTile.SetRayCast(true);
+            reversedTile.SetInteractable(true);
+            reversedTile.isQueued = false;
+            horizontalLayoutGroup.enabled = true;
+            DisableOverLappedTiles(grids);
+          }
+      );
+    }
+    #endregion
+    #region  Shuffle
+    public void ShuffleTiles()
+    {
+      tileManager.Shuffle(tilesId);
+    for(int i =0;i<tiles.Count;i++)
+     {
+       if(!tiles[i].isQueued)
+      {
+        tiles[i].SetId(tilesId[i]);
+        int tileId = tiles[i].GetId();
+      Sprite tileSprite = tileManager.GetSpriteById(tileId);
+      if(!tiles[i].isBlocked)
+      {
+        tiles[i].SetTileSprite(tileSprite);
+      }
+      }
+     }
+    }
+    #endregion
+    #region InnitNewLevel
+    public void NextLevel()
+    {
+      uIManager.SetAddSlotButton(true);
+      foreach(Grid grid in grids)
+      {
+        Destroy(grid.gameObject);
+
+      }
+      grids.Clear();
+      currentLevel++;
+      InitData();
+      uIManager.SetActiveUIWin(false);
+      uIManager.SetAddSlotButton(true);
+    }
+     public void NextLevel1()
+    {
+      uIManager.SetAddSlotButton(true);
+      foreach(Tile tile in tiles)
+      {
+        Destroy(tile.gameObject);
+      }
+      foreach(Grid grid in grids)
+      {
+        Destroy(grid.gameObject);
+
+      }
+      grids.Clear();
+      currentLevel++;
+      InitData();
+      uIManager.SetActiveUIWin(false);
+      uIManager.SetAddSlotButton(true);
+    }
+    #endregion
 }
 
 

@@ -31,8 +31,8 @@ public class Grid : MonoBehaviour
                 Vector2Int locaion = new Vector2Int(i,j);
                 tile.Init(locaion,layer);
                 tile.SetStatus(isBlocked);
-                tiles.Add(tile);
                 if(!tile.isBlocked){
+                     tiles.Add(tile);
                     tile.OnClick += OnGridTileClick;
                 }
             }
@@ -46,9 +46,12 @@ public class Grid : MonoBehaviour
     public void InitLayer(int layer){
         this.layer = layer;
     }
-    public void InitData(List<int> tilesId){
+    public void InitData(List<int> tilesId){;
     for(int i =0;i<tiles.Count;i++){
-     tiles[i].SetId(tilesId[i]);
+        if(!tiles[i].isQueued)
+        {
+            tiles[i].SetId(tilesId[i]);
+        }
      }
     }
     public Tile GetTileAtPosition(Vector2Int position)

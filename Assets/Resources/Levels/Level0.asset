@@ -13,9 +13,5 @@ MonoBehaviour:
   m_Name: Level0
   m_EditorClassIdentifier: 
   shapeSOs:
-  - {fileID: 11400000, guid: 9b412049706326a4dbf5b51d5c87ad5a, type: 2}
-  - {fileID: 11400000, guid: c3dc68da017e97e4c908f4ea155e1963, type: 2}
-  - {fileID: 11400000, guid: c9e66132d7498024da60b82a844f339d, type: 2}
-  totalTiles: 84
-  totalTilesType: 6
-  tilesDataSO: {fileID: 11400000, guid: bc06e767e624de54dbbc005fba0a2d3f, type: 2}
+  - {fileID: 11400000, guid: f22d35f989953b64e8fc0cd728ebeec8, type: 2}
+  totalTiles: 54
