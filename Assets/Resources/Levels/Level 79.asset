@@ -9,9 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b2b618e36f2440546938e128d84ab3cb, type: 3}
+  m_Script: {fileID: 11500000, guid: 4ef01bc4f8e62a740803af93ca92a0e0, type: 3}
   m_Name: Level 79
   m_EditorClassIdentifier: 
-  rows: 0
-  columns: 0
-  blockedCells: 
+  shapeSOs:
+  - {fileID: 11400000, guid: 2aa2e294b69e17e4a9714a4a08c736a6, type: 2}
+  - {fileID: 11400000, guid: 29bd825535b6a9246b8b849239f486ff, type: 2}
+  - {fileID: 11400000, guid: 7bf6939dc96357144983997fc610706d, type: 2}
+  - {fileID: 11400000, guid: 85dc28b9ebc40304e8e9a56860af055d, type: 2}
+  totalTiles: 0
