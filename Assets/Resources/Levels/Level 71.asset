@@ -12,5 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ef01bc4f8e62a740803af93ca92a0e0, type: 3}
   m_Name: Level 71
   m_EditorClassIdentifier: 
-  shapeSOs: []
+  shapeSOs:
+  - {fileID: 11400000, guid: 9a22e910d77cdfc4db63666c8c525aae, type: 2}
+  - {fileID: 11400000, guid: 321516026b9fd024481adba9b882b886, type: 2}
+  - {fileID: 11400000, guid: cd8184079852f994095f7373d839dedd, type: 2}
+  - {fileID: 11400000, guid: 8c1f096d122ae9c41bb028b7f1f1e973, type: 2}
   totalTiles: 0
