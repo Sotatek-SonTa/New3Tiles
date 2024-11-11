@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName ="LevelData",menuName ="ScriptableObject/LevelData")]
+[CreateAssetMenu(fileName ="Level",menuName ="ScriptableObject/LevelData")]
 public class LevelData : ScriptableObject
 {
     public List<ShapeSO> shapeSOs;

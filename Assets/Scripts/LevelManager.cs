@@ -32,7 +32,7 @@ public class LevelManager : MonoBehaviour
     }
     void InitData()
     { 
-       levelData = Resources.Load<LevelData>($"Levels/Level{currentLevel}");
+       levelData = Resources.Load<LevelData>($"Levels/Level {currentLevel}");
        tileQueueContains = 6;
        tiles.Clear();
        tilesId.Clear();
@@ -238,6 +238,9 @@ public class LevelManager : MonoBehaviour
             else if(currentGrid.shapeSO.columns< lowerGrid.shapeSO.columns)
             {
               affectedPositions = OverLapFourTiles(upperTilePos);
+            } else 
+            {
+              affectedPositions.Add(OverLapOneTile(upperTilePos));
             }
             foreach (Vector2Int pos in affectedPositions)
             {
@@ -343,6 +346,19 @@ public class LevelManager : MonoBehaviour
       InitData();
       uIManager.SetActiveUIWin(false);
       uIManager.SetAddSlotButton(true);
+    }
+    public void ReloadLevel(){
+       foreach(Tile tile in tiles)
+      {
+        Destroy(tile.gameObject);
+      }
+      foreach(Grid grid in grids)
+      {
+        Destroy(grid.gameObject);
+
+      }
+      grids.Clear();
+      InitData();
     }
     #endregion
 }

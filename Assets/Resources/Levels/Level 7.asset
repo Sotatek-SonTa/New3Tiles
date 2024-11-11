@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ef01bc4f8e62a740803af93ca92a0e0, type: 3}
+  m_Name: Level 7
+  m_EditorClassIdentifier: 
+  shapeSOs:
+  - {fileID: 11400000, guid: 93bd846df0dc5064ba5e2919af6681e5, type: 2}
+  - {fileID: 11400000, guid: fe9cf7356d3d51e438716cc0149577a9, type: 2}
+  - {fileID: 11400000, guid: d2a02c1311bcb2247ab197e306388b4a, type: 2}
+  - {fileID: 11400000, guid: 7625274bfd20bb740bf66be8cf0034d2, type: 2}
+  totalTiles: 51
