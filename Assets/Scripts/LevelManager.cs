@@ -329,37 +329,37 @@ public class LevelManager : MonoBehaviour
       uIManager.SetActiveUIWin(false);
       uIManager.SetAddSlotButton(true);
     }
-     public void NextLevel1()
-    {
-      uIManager.SetAddSlotButton(true);
-      foreach(Tile tile in tiles)
-      {
-        Destroy(tile.gameObject);
-      }
-      foreach(Grid grid in grids)
-      {
-        Destroy(grid.gameObject);
+    //  public void NextLevel1()
+    // {
+    //   uIManager.SetAddSlotButton(true);
+    //   foreach(Tile tile in tiles)
+    //   {
+    //     Destroy(tile.gameObject);
+    //   }
+    //   foreach(Grid grid in grids)
+    //   {
+    //     Destroy(grid.gameObject);
 
-      }
-      grids.Clear();
-      currentLevel++;
-      InitData();
-      uIManager.SetActiveUIWin(false);
-      uIManager.SetAddSlotButton(true);
-    }
-    public void ReloadLevel(){
-       foreach(Tile tile in tiles)
-      {
-        Destroy(tile.gameObject);
-      }
-      foreach(Grid grid in grids)
-      {
-        Destroy(grid.gameObject);
+    //   }
+    //   grids.Clear();
+    //   currentLevel++;
+    //   InitData();
+    //   uIManager.SetActiveUIWin(false);
+    //   uIManager.SetAddSlotButton(true);
+    // }
+    // public void ReloadLevel(){
+    //    foreach(Tile tile in tiles)
+    //   {
+    //     Destroy(tile.gameObject);
+    //   }
+    //   foreach(Grid grid in grids)
+    //   {
+    //     Destroy(grid.gameObject);
 
-      }
-      grids.Clear();
-      InitData();
-    }
+    //   }
+    //   grids.Clear();
+    //   InitData();
+    // }
     #endregion
 }
 
