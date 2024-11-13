@@ -19,6 +19,10 @@ public class LevelManager : MonoBehaviour
     public TileManager tileManager;
     public UIManager uIManager;
 
+    public static Vector2 firstPosition = new Vector2(60f,-1417f);
+
+    public List<Vector2> matchedTileLocation = new List<Vector2>();
+
     [Header("Ingame data")]
     public int currentLevel=0;
     [SerializeField]private int tileQueueContains = 6;
@@ -71,46 +75,99 @@ public class LevelManager : MonoBehaviour
           if(queueTiles.Count >tileQueueContains)
           {
             return;
-          }
+          }   
           foreach(Grid grid in grids){
             if(grid.layer == layer){
               grid.gridLayoutGroup.enabled = false;
-              foreach(Tile tile in grid.tiles){
-                if(tile.location == location){
-                  tile.saveRectTransform = tile.rectTransform.anchoredPosition;
-                 tile.transform.DOMove(QueueTile.transform.position,0.5f).OnComplete(()
-                 =>{
-                    tile.transform.SetParent(QueueTile.transform,true);
-                    tile.SetRayCast(false);
-                    tile.isQueued = true;
-                    tiles.Remove(tile);
-                    queueTiles.Add(tile);
-                    tilesId.Remove(tile.GetId());
-                    EnableRayCastOverLappedTiles(tile.GetLocation(),tile.GetLayer(),grids);
-                    DisableOverLappedTiles(grids);
-                    HandleThreeMatching(tile);
+              foreach(Tile choosenTile in grid.tiles){
+                if(choosenTile.location == location){
+                  choosenTile.saveRectTransform = choosenTile.rectTransform.anchoredPosition;
+                  if(queueTiles.Count==0)
+                  {
+                      HandleTileBehaviour(choosenTile);
+                      choosenTile.rectTransform.DOAnchorPos(firstPosition,0.5f);
+                  }
+                  else{
+                    Tile findlastTile = queueTiles.FindLast(choosenTile => choosenTile.GetId() == id);
+                    Vector2 nextTile = new Vector2();
+                    if(findlastTile==null)
+                    {
+                       nextTile = queueTiles[queueTiles.Count-1].rectTransform.anchoredPosition;
+                    }else
+                    {
+                       nextTile = findlastTile.rectTransform.anchoredPosition;
+                    }    
+                    nextTile.x += 120;
+                    nextTile.y = firstPosition.y;
+                    HandleTileBehaviour(choosenTile,findlastTile);
+                    for(int i = queueTiles.IndexOf(choosenTile)+1;i<queueTiles.Count;i++)
+                    {
+                     Vector2 newPosition = queueTiles[i].rectTransform.anchoredPosition;
+                     newPosition.x += 120;
+                     newPosition.y = firstPosition.y;
+                     queueTiles[i].rectTransform.DOAnchorPos(newPosition,0.5f);
+                   }
+                    choosenTile.rectTransform.DOAnchorPos(nextTile,0.5f).OnComplete(()
+                    =>{
+                    HandleThreeMatching(choosenTile);
+                    Debug.Log(queueTiles.IndexOf(choosenTile));
+
                     if(tiles.Count ==0)
                     {
                       uIManager.SetActiveUIWin(true);
                     }
-                 });
+                  });
+                  }
                 }
               }
             }
           }
+    }
+    public void HandleTileBehaviour(Tile tile, Tile lastTile =null)
+    {
+
+      int index = queueTiles.IndexOf(lastTile);
+      tile.SetRayCast(false);
+      tile.isQueued = true;
+      tiles.Remove(tile);
+      if(lastTile == null)
+      {
+        queueTiles.Add(tile);   
+      }
+      else
+      {
+       queueTiles.Insert(index+1,tile);
+      }
+      tilesId.Remove(tile.GetId());
+      EnableRayCastOverLappedTiles(tile.GetLocation(),tile.GetLayer(),grids);
+      DisableOverLappedTiles(grids);
     }
     public void HandleThreeMatching(Tile tile){
         int currentTileId = tile.GetId();
         int countSameId = queueTiles.Count(t => t.GetId() == tile.GetId());
         if(countSameId >=3){
            var tilesToRemove = queueTiles.Where(t=>t.GetId() == tile.GetId()).ToList();
-           foreach(Tile t in tilesToRemove){
+             for(int i = queueTiles.IndexOf(tilesToRemove[0])+3;i<queueTiles.Count;i++)
+           {
+            queueTiles[i].rectTransform.DOAnchorPos(queueTiles[i-3].rectTransform.anchoredPosition,0.5f);
+           }
+             foreach(Tile t in tilesToRemove){
               Destroy(t.gameObject);
               queueTiles.Remove(t);
               tiles.Remove(t);
            }
-           queueTiles = queueTiles.Where(t=>t.GetId() != tile.GetId()).ToList(); 
-        }  
+           queueTiles = queueTiles.Where(t=>t.GetId() != tile.GetId()).ToList();
+        } 
+        // else
+        // {
+        //   for(int i = queueTiles.IndexOf(tile)+1;i<queueTiles.Count;i++)
+        //   {
+        //     Vector2 newPosition = queueTiles[i].rectTransform.anchoredPosition;
+        //     newPosition.x += 120;
+        //     newPosition.y = firstPosition.y;
+        //     queueTiles[i].rectTransform.DOAnchorPos(newPosition,0.5f);
+        //   }
+        // } 
       }
       public void DisableOverLappedTiles(List<Grid> gridList)
       {
@@ -329,37 +386,6 @@ public class LevelManager : MonoBehaviour
       uIManager.SetActiveUIWin(false);
       uIManager.SetAddSlotButton(true);
     }
-    //  public void NextLevel1()
-    // {
-    //   uIManager.SetAddSlotButton(true);
-    //   foreach(Tile tile in tiles)
-    //   {
-    //     Destroy(tile.gameObject);
-    //   }
-    //   foreach(Grid grid in grids)
-    //   {
-    //     Destroy(grid.gameObject);
-
-    //   }
-    //   grids.Clear();
-    //   currentLevel++;
-    //   InitData();
-    //   uIManager.SetActiveUIWin(false);
-    //   uIManager.SetAddSlotButton(true);
-    // }
-    // public void ReloadLevel(){
-    //    foreach(Tile tile in tiles)
-    //   {
-    //     Destroy(tile.gameObject);
-    //   }
-    //   foreach(Grid grid in grids)
-    //   {
-    //     Destroy(grid.gameObject);
-
-    //   }
-    //   grids.Clear();
-    //   InitData();
-    // }
     #endregion
 }
 

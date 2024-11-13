@@ -14,6 +14,7 @@ public class Tile : MonoBehaviour
     [SerializeField] public bool isBlocked;
     [SerializeField] public RectTransform rectTransform;
     [SerializeField] public Vector2 saveRectTransform;
+    [SerializeField] public Vector2 newRectTransform;
    [SerializeField] public bool isQueued;
    [SerializeField] public Button button;
 
