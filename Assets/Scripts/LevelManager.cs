@@ -19,15 +19,16 @@ public class LevelManager : MonoBehaviour
     public TileManager tileManager;
     public UIManager uIManager;
 
-    public static Vector2 firstPosition = new Vector2(60f,-1417f);
+    public static Vector2 firstPosition = new Vector2();
 
-    public List<Vector2> matchedTileLocation = new List<Vector2>();
+    public Tile lastSelectedTile;
 
     [Header("Ingame data")]
     public int currentLevel=0;
     [SerializeField]private int tileQueueContains = 6;
     void Start()
     {
+    firstPosition.y = QueueTile.GetComponent<RectTransform>().anchoredPosition.y + QueueTile.GetComponent<RectTransform>().rect.height/2;
     uIManager.addOneMoreSlot.onClick.AddListener(AddOneMoreSlot);
     uIManager.reverseMove.onClick.AddListener(ReverseLastMove);
     uIManager.shuffleTiles.onClick.AddListener(ShuffleTiles);
@@ -82,10 +83,13 @@ public class LevelManager : MonoBehaviour
               foreach(Tile choosenTile in grid.tiles){
                 if(choosenTile.location == location){
                   choosenTile.saveRectTransform = choosenTile.rectTransform.anchoredPosition;
+                  lastSelectedTile = choosenTile;
+                  Debug.Log(lastSelectedTile.saveRectTransform);
+                  firstPosition.x = choosenTile.rectTransform.rect.width/2;
                   if(queueTiles.Count==0)
                   {
                       HandleTileBehaviour(choosenTile);
-                      choosenTile.rectTransform.DOAnchorPos(firstPosition,0.5f);
+                      choosenTile.rectTransform.DOAnchorPos(firstPosition,0.2f);
                   }
                   else{
                     Tile findlastTile = queueTiles.FindLast(choosenTile => choosenTile.GetId() == id);
@@ -97,17 +101,20 @@ public class LevelManager : MonoBehaviour
                     {
                        nextTile = findlastTile.rectTransform.anchoredPosition;
                     }    
-                    nextTile.x += 120;
-                    nextTile.y = firstPosition.y;
+                    nextTile.x += choosenTile.rectTransform.rect.width;
                     HandleTileBehaviour(choosenTile,findlastTile);
+
+                    //Di chuyen các tile trong queueTile
                     for(int i = queueTiles.IndexOf(choosenTile)+1;i<queueTiles.Count;i++)
                     {
                      Vector2 newPosition = queueTiles[i].rectTransform.anchoredPosition;
-                     newPosition.x += 120;
+                     newPosition.x += choosenTile.rectTransform.rect.width ;
                      newPosition.y = firstPosition.y;
-                     queueTiles[i].rectTransform.DOAnchorPos(newPosition,0.5f);
+                     queueTiles[i].rectTransform.DOAnchorPos(newPosition,0.2f);
                    }
-                    choosenTile.rectTransform.DOAnchorPos(nextTile,0.5f).OnComplete(()
+
+                   //Di chuyen choosenTile
+                    choosenTile.rectTransform.DOAnchorPos(nextTile,0.2f).OnComplete(()
                     =>{
                     HandleThreeMatching(choosenTile);
                     Debug.Log(queueTiles.IndexOf(choosenTile));
@@ -148,26 +155,17 @@ public class LevelManager : MonoBehaviour
         if(countSameId >=3){
            var tilesToRemove = queueTiles.Where(t=>t.GetId() == tile.GetId()).ToList();
              for(int i = queueTiles.IndexOf(tilesToRemove[0])+3;i<queueTiles.Count;i++)
-           {
-            queueTiles[i].rectTransform.DOAnchorPos(queueTiles[i-3].rectTransform.anchoredPosition,0.5f);
-           }
-             foreach(Tile t in tilesToRemove){
+            {
+            queueTiles[i].rectTransform.DOAnchorPos(queueTiles[i-3].rectTransform.anchoredPosition,0.2f);
+            }
+            foreach(Tile t in tilesToRemove)
+            {
               Destroy(t.gameObject);
               queueTiles.Remove(t);
               tiles.Remove(t);
-           }
+            }
            queueTiles = queueTiles.Where(t=>t.GetId() != tile.GetId()).ToList();
         } 
-        // else
-        // {
-        //   for(int i = queueTiles.IndexOf(tile)+1;i<queueTiles.Count;i++)
-        //   {
-        //     Vector2 newPosition = queueTiles[i].rectTransform.anchoredPosition;
-        //     newPosition.x += 120;
-        //     newPosition.y = firstPosition.y;
-        //     queueTiles[i].rectTransform.DOAnchorPos(newPosition,0.5f);
-        //   }
-        // } 
       }
       public void DisableOverLappedTiles(List<Grid> gridList)
       {
@@ -334,9 +332,19 @@ public class LevelManager : MonoBehaviour
       {
         return;
       }
+      if(lastSelectedTile !=null)
+      {
+        HandleRevereseTile(lastSelectedTile);
+        Debug.Log(queueTiles.IndexOf(lastSelectedTile));
+        for(int i = queueTiles.IndexOf(lastSelectedTile)+1;i<queueTiles.Count;i++)
+        {
+            queueTiles[i].rectTransform.DOAnchorPos(queueTiles[i-1].rectTransform.anchoredPosition,0.2f);
+        }
+        lastSelectedTile = null;  
+      }
+      else
+      {
       Tile reversedTile = queueTiles[queueTiles.Count-1];
-      HorizontalLayoutGroup horizontalLayoutGroup =QueueTile.GetComponent<HorizontalLayoutGroup>();
-      horizontalLayoutGroup.enabled = false;
       reversedTile.transform.SetParent(grids[reversedTile.GetLayer()].transform,true);
       reversedTile.rectTransform.DOAnchorPos(reversedTile.saveRectTransform,0.5f).OnComplete(()
         =>{
@@ -346,10 +354,25 @@ public class LevelManager : MonoBehaviour
             reversedTile.SetRayCast(true);
             reversedTile.SetInteractable(true);
             reversedTile.isQueued = false;
-            horizontalLayoutGroup.enabled = true;
             DisableOverLappedTiles(grids);
           }
       );
+      }
+      
+    }
+    public void HandleRevereseTile(Tile reverseTile)
+    {
+       reverseTile.rectTransform.DOAnchorPos(reverseTile.saveRectTransform,0.5f).OnComplete(()
+       =>
+       {
+         tiles.Add(reverseTile);
+         queueTiles.Remove(reverseTile);
+         tilesId.Add(reverseTile.GetId());
+         reverseTile.SetRayCast(true);
+         reverseTile.SetInteractable(true);
+         DisableOverLappedTiles(grids);
+       }
+       );
     }
     #endregion
     #region  Shuffle
