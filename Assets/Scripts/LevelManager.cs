@@ -84,14 +84,15 @@ public class LevelManager : MonoBehaviour
                 if(choosenTile.location == location){
                   choosenTile.saveRectTransform = choosenTile.rectTransform.anchoredPosition;
                   lastSelectedTile = choosenTile;
-                  Debug.Log(lastSelectedTile.saveRectTransform);
                   firstPosition.x = choosenTile.rectTransform.rect.width/2;
                   if(queueTiles.Count==0)
                   {
                       HandleTileBehaviour(choosenTile);
-                      choosenTile.rectTransform.DOAnchorPos(firstPosition,0.2f);
+                      choosenTile.SetScaling(1.5f,1f,0.4f);
+                      choosenTile.rectTransform.DOAnchorPos(firstPosition,0.35f);
                   }
-                  else{
+                  else
+                  {
                     Tile findlastTile = queueTiles.FindLast(choosenTile => choosenTile.GetId() == id);
                     Vector2 nextTile = new Vector2();
                     if(findlastTile==null)
@@ -110,15 +111,14 @@ public class LevelManager : MonoBehaviour
                      Vector2 newPosition = queueTiles[i].rectTransform.anchoredPosition;
                      newPosition.x += choosenTile.rectTransform.rect.width ;
                      newPosition.y = firstPosition.y;
-                     queueTiles[i].rectTransform.DOAnchorPos(newPosition,0.2f);
+                     queueTiles[i].rectTransform.DOAnchorPos(newPosition,0.09f);
                    }
 
                    //Di chuyen choosenTile
-                    choosenTile.rectTransform.DOAnchorPos(nextTile,0.2f).OnComplete(()
+                    choosenTile.SetScaling(1.5f,1f,0.4f);
+                    choosenTile.rectTransform.DOAnchorPos(nextTile,0.09f).OnComplete(()
                     =>{
                     HandleThreeMatching(choosenTile);
-                    Debug.Log(queueTiles.IndexOf(choosenTile));
-
                     if(tiles.Count ==0)
                     {
                       uIManager.SetActiveUIWin(true);
@@ -136,7 +136,6 @@ public class LevelManager : MonoBehaviour
       int index = queueTiles.IndexOf(lastTile);
       tile.SetRayCast(false);
       tile.isQueued = true;
-      tiles.Remove(tile);
       if(lastTile == null)
       {
         queueTiles.Add(tile);   
@@ -146,6 +145,7 @@ public class LevelManager : MonoBehaviour
        queueTiles.Insert(index+1,tile);
       }
       tilesId.Remove(tile.GetId());
+      tiles.Remove(tile);
       EnableRayCastOverLappedTiles(tile.GetLocation(),tile.GetLayer(),grids);
       DisableOverLappedTiles(grids);
     }
@@ -160,11 +160,11 @@ public class LevelManager : MonoBehaviour
             }
             foreach(Tile t in tilesToRemove)
             {
-              Destroy(t.gameObject);
               queueTiles.Remove(t);
-              tiles.Remove(t);
+              t.gameObject.SetActive(false);
             }
            queueTiles = queueTiles.Where(t=>t.GetId() != tile.GetId()).ToList();
+           lastSelectedTile = null;
         } 
       }
       public void DisableOverLappedTiles(List<Grid> gridList)
@@ -293,10 +293,7 @@ public class LevelManager : MonoBehaviour
             else if(currentGrid.shapeSO.columns< lowerGrid.shapeSO.columns)
             {
               affectedPositions = OverLapFourTiles(upperTilePos);
-            } else 
-            {
-              affectedPositions.Add(OverLapOneTile(upperTilePos));
-            }
+            } 
             foreach (Vector2Int pos in affectedPositions)
             {
                 Tile lowerTile = lowerGrid.GetTileAtPosition(pos);
@@ -334,8 +331,8 @@ public class LevelManager : MonoBehaviour
       }
       if(lastSelectedTile !=null)
       {
+        lastSelectedTile.SetScaling(1.5f,1f,0.5f);
         HandleRevereseTile(lastSelectedTile);
-        Debug.Log(queueTiles.IndexOf(lastSelectedTile));
         for(int i = queueTiles.IndexOf(lastSelectedTile)+1;i<queueTiles.Count;i++)
         {
             queueTiles[i].rectTransform.DOAnchorPos(queueTiles[i-1].rectTransform.anchoredPosition,0.2f);
@@ -344,25 +341,17 @@ public class LevelManager : MonoBehaviour
       }
       else
       {
+      lastSelectedTile = null;  
       Tile reversedTile = queueTiles[queueTiles.Count-1];
+      reversedTile.SetScaling(1.5f,1f,0.5f);
       reversedTile.transform.SetParent(grids[reversedTile.GetLayer()].transform,true);
-      reversedTile.rectTransform.DOAnchorPos(reversedTile.saveRectTransform,0.5f).OnComplete(()
-        =>{
-            tiles.Add(reversedTile);
-            queueTiles.Remove(reversedTile);
-            tilesId.Add(reversedTile.GetId());
-            reversedTile.SetRayCast(true);
-            reversedTile.SetInteractable(true);
-            reversedTile.isQueued = false;
-            DisableOverLappedTiles(grids);
-          }
-      );
+      HandleRevereseTile(reversedTile);
       }
       
     }
     public void HandleRevereseTile(Tile reverseTile)
     {
-       reverseTile.rectTransform.DOAnchorPos(reverseTile.saveRectTransform,0.5f).OnComplete(()
+       reverseTile.rectTransform.DOAnchorPos(reverseTile.saveRectTransform,0.3f).OnComplete(()
        =>
        {
          tiles.Add(reverseTile);
@@ -370,6 +359,7 @@ public class LevelManager : MonoBehaviour
          tilesId.Add(reverseTile.GetId());
          reverseTile.SetRayCast(true);
          reverseTile.SetInteractable(true);
+         reverseTile.isQueued = false;
          DisableOverLappedTiles(grids);
        }
        );
@@ -384,7 +374,7 @@ public class LevelManager : MonoBehaviour
        if(!tiles[i].isQueued)
       {
         tiles[i].SetId(tilesId[i]);
-        int tileId = tiles[i].GetId();
+      int tileId = tiles[i].GetId();
       Sprite tileSprite = tileManager.GetSpriteById(tileId);
       if(!tiles[i].isBlocked)
       {

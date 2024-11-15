@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using DG;
+using DG.Tweening;
 using System;
 
 public class Tile : MonoBehaviour
@@ -72,8 +74,10 @@ public class Tile : MonoBehaviour
           bg.enabled = true;
        }
     }
-    public void SetBackGround(){
-        
+    public void SetScaling(float startScaling, float endScaling,float duration)
+    {
+       rectTransform.localScale = new Vector3(startScaling,startScaling,startScaling);
+        rectTransform.DOScale(endScaling,duration);
     }
        void ButtonClick()
     {
