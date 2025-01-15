@@ -76,7 +76,7 @@ public class Tile : MonoBehaviour
     }
     public void SetScaling(float startScaling, float endScaling,float duration)
     {
-       rectTransform.localScale = new Vector3(startScaling,startScaling,startScaling);
+        rectTransform.localScale = new Vector3(startScaling,startScaling,startScaling);
         rectTransform.DOScale(endScaling,duration);
     }
        void ButtonClick()

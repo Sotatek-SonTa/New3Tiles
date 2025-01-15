@@ -99,13 +99,13 @@ public class TileManager : MonoBehaviour
         return tilesId;
     }
     public void Shuffle(List<int> list)
-{
-    for (int i = list.Count - 1; i > 0; i--)
     {
+      for (int i = list.Count - 1; i > 0; i--)
+      {
         int rnd = Random.Range(0, i + 1);
         int temp = list[i];
         list[i] = list[rnd];
         list[rnd] = temp;
-    }
-}
+      }
+   }
 }

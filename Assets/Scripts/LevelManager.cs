@@ -28,7 +28,7 @@ public class LevelManager : MonoBehaviour
     [SerializeField]private int tileQueueContains = 6;
     void Start()
     {
-    firstPosition.y = QueueTile.GetComponent<RectTransform>().anchoredPosition.y + QueueTile.GetComponent<RectTransform>().rect.height/2;
+    firstPosition.y = QueueTile.GetComponent<RectTransform>().anchoredPosition.y + QueueTile.GetComponent<RectTransform>().rect.height/2+5;
     uIManager.addOneMoreSlot.onClick.AddListener(AddOneMoreSlot);
     uIManager.reverseMove.onClick.AddListener(ReverseLastMove);
     uIManager.shuffleTiles.onClick.AddListener(ShuffleTiles);
@@ -84,12 +84,12 @@ public class LevelManager : MonoBehaviour
                 if(choosenTile.location == location){
                   choosenTile.saveRectTransform = choosenTile.rectTransform.anchoredPosition;
                   lastSelectedTile = choosenTile;
-                  firstPosition.x = choosenTile.rectTransform.rect.width/2;
+                  firstPosition.x =70;
                   if(queueTiles.Count==0)
                   {
                       HandleTileBehaviour(choosenTile);
                       choosenTile.SetScaling(1.5f,1f,0.4f);
-                      choosenTile.rectTransform.DOAnchorPos(firstPosition,0.35f);
+                      choosenTile.rectTransform.DOAnchorPos(firstPosition,0.15f);
                   }
                   else
                   {
@@ -116,7 +116,7 @@ public class LevelManager : MonoBehaviour
 
                    //Di chuyen choosenTile
                     choosenTile.SetScaling(1.5f,1f,0.4f);
-                    choosenTile.rectTransform.DOAnchorPos(nextTile,0.09f).OnComplete(()
+                    choosenTile.rectTransform.DOAnchorPos(nextTile,0.15f).OnComplete(()
                     =>{
                     HandleThreeMatching(choosenTile);
                     if(tiles.Count ==0)
@@ -365,6 +365,7 @@ public class LevelManager : MonoBehaviour
        );
     }
     #endregion
+    
     #region  Shuffle
     public void ShuffleTiles()
     {
