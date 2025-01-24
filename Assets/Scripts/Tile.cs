@@ -6,6 +6,7 @@ using DG;
 using DG.Tweening;
 using System;
 
+
 public class Tile : MonoBehaviour
 {
     [SerializeField]  int id;
@@ -84,3 +85,5 @@ public class Tile : MonoBehaviour
         OnClick?.Invoke(id,location,layer);
     }
 }
+
+
